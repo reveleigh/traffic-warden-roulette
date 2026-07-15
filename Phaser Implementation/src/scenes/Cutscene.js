@@ -63,14 +63,8 @@ export default class Cutscene extends Phaser.Scene {
         this.gameScene.wardenInterval = Math.max(50, this.gameScene.wardenInterval * 0.9);
         this.gameScene.startWardenTimer();
 
-        // Guilt check
-        if (Math.random() < this.state.guiltChance) {
-            this.state.guiltModeActive = true;
-            this.state.guiltChance *= 2;
-            this.sound.play('music_guilt');
-        } else {
-            this.sound.play('music_bg', { loop: true });
-        }
+        // Defer guilt check to Game.js
+        this.gameScene.pendingGuiltCheck = true;
 
         this.gameScene.scene.resume();
         this.scene.resume('UI');

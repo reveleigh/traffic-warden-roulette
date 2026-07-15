@@ -41,6 +41,7 @@ export default class Game extends Phaser.Scene {
         this.isActivityRunning = false;
         this.isMissionPopupOpen = false;
         this.distractionTarget = null;
+        this.pendingGuiltCheck = false;
         
         // Timers
         this.wardenInterval = 400;
@@ -68,6 +69,7 @@ export default class Game extends Phaser.Scene {
         this.events.on('player_moved', this.checkArrival, this);
         this.events.on('warden_moved', this.checkCollision, this);
         this.events.on('mission_choice', this.handleMissionChoice, this);
+        this.events.on('resume', this.onGameResume, this);
 
         // Start first mission
         this.startNewMission();
@@ -81,6 +83,31 @@ export default class Game extends Phaser.Scene {
         this.targetHighlight.setVisible(true);
 
         this.events.emit('update_ui_mission');
+    }
+
+    onGameResume() {
+        if (this.pendingGuiltCheck) {
+            this.pendingGuiltCheck = false;
+            
+            if (Math.random() < this.stateManager.guiltChance) {
+                this.stateManager.guiltModeActive = true;
+                this.stateManager.guiltChance *= 2;
+                
+                this.sound.stopAll();
+                const guiltMusic = this.sound.add('music_guilt');
+                guiltMusic.play();
+                guiltMusic.once('complete', () => {
+                    this.stateManager.guiltModeActive = false;
+                    this.events.emit('ui_message', "Moral Panic Subsided");
+                    this.events.emit('update_ui_hud');
+                    this.sound.play('music_bg', { loop: true });
+                });
+            } else {
+                this.sound.stopAll();
+                this.sound.play('music_bg', { loop: true });
+            }
+            this.events.emit('update_ui_hud');
+        }
     }
 
     advanceDate() {
@@ -263,7 +290,17 @@ export default class Game extends Phaser.Scene {
         // Check Rage
         if (this.stateManager.rewardLevel >= 6) {
             if (this.stateManager.rewardLevel === 6) {
-                this.sound.play('music_rage', { loop: true });
+                this.sound.stopAll();
+                const rageMusic = this.sound.add('music_rage');
+                rageMusic.play();
+                rageMusic.once('complete', () => {
+                    this.stateManager.rewardLevel = 0;
+                    this.wardenInterval = Math.max(50, this.wardenInterval * 0.8);
+                    this.startWardenTimer();
+                    this.events.emit('ui_message', "Warden calmed down.");
+                    this.events.emit('update_ui_hud');
+                    this.sound.play('music_bg', { loop: true });
+                });
             }
             this.wardenInterval = 125;
             this.startWardenTimer();

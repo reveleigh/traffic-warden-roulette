@@ -30,6 +30,44 @@ export default class UI extends Phaser.Scene {
         this.progressText = this.add.text(200, -20, 'Risking IT', { fontSize: '20px', fill: '#ffffff' }).setOrigin(0.5);
         this.progressBarContainer.add([this.progressBg, this.progressFill, this.progressText]);
 
+        // Rage Mode Overlay
+        this.rageOverlay = this.add.rectangle(0, 90, 800, 600, 0x00ff00, 0.2).setOrigin(0, 0).setVisible(false);
+        this.rageText = this.add.text(400, 55, 'WARDEN DESPAIR RAGE', { fontSize: '40px', fill: '#ff0000', fontStyle: 'bold' }).setOrigin(0.5).setVisible(false);
+        
+        // Guilt Mode Overlay
+        this.guiltOverlay = this.add.rectangle(0, 90, 800, 600, 0xff0000, 0.4).setOrigin(0, 0).setVisible(false);
+        this.guiltText = this.add.text(400, 100, 'Moral Panic: Guilt Mode Enabled', { fontSize: '60px', fill: '#ffffff' }).setOrigin(0.5).setVisible(false);
+        this.guiltTextShadow = this.add.text(402, 102, 'Moral Panic: Guilt Mode Enabled', { fontSize: '60px', fill: '#000000' }).setOrigin(0.5).setVisible(false);
+        
+        // Flashing text timer
+        this.time.addEvent({
+            delay: 500,
+            loop: true,
+            callback: () => {
+                if (this.state.guiltModeActive) {
+                    const isVis = this.guiltText.visible;
+                    this.guiltText.setVisible(!isVis);
+                    this.guiltTextShadow.setVisible(!isVis);
+                }
+            }
+        });
+
+        // Meters (Audacity / Fine)
+        this.add.text(420 - 75, 12, 'Audacity:', { fontSize: '20px', fill: '#c8c8c8' });
+        this.add.text(650 - 45, 12, 'Fine:', { fontSize: '20px', fill: '#c8c8c8' });
+
+        this.audacityBlocks = [];
+        for (let i = 0; i < 6; i++) {
+            const block = this.add.rectangle(420 + i * 17, 10, 15, 20, 0x323232).setOrigin(0, 0);
+            this.audacityBlocks.push(block);
+        }
+
+        this.fineBlocks = [];
+        for (let i = 0; i < 6; i++) {
+            const block = this.add.rectangle(650 + i * 17, 10, 15, 20, 0x320000).setOrigin(0, 0);
+            this.fineBlocks.push(block);
+        }
+
         // Mission Pop-up Container
         this.popupContainer = this.add.container(0, 0).setVisible(false);
         const pbg = this.add.rectangle(400, 360, 600, 400, 0x14141e).setOrigin(0.5).setStrokeStyle(2, 0xffffff);
@@ -77,7 +115,38 @@ export default class UI extends Phaser.Scene {
         const month = d.toLocaleString('en-GB', { month: 'short' });
         this.moneyDateText.setText(`£${this.state.money.toFixed(2)}   Date: ${day} ${month}`);
         
-        // Note: Actual bar rendering for audacity/fines would go here.
+        // Update Meters
+        for (let i = 0; i < 6; i++) {
+            if (i < this.state.rewardLevel) {
+                if (this.state.rewardLevel >= 6 && i === 5) {
+                    this.audacityBlocks[i].setFillStyle(0xffd700); // Gold for full rage
+                } else {
+                    this.audacityBlocks[i].setFillStyle(0x00ff64); // Green
+                }
+            } else {
+                this.audacityBlocks[i].setFillStyle(0x323232); // Empty
+            }
+            
+            if (i < this.state.fineLevel) {
+                this.fineBlocks[i].setFillStyle(0xff0000); // Red
+            } else {
+                this.fineBlocks[i].setFillStyle(0x320000); // Empty
+            }
+        }
+
+        // Update Overlays
+        const isRage = this.state.rewardLevel >= 6;
+        this.rageOverlay.setVisible(isRage);
+        this.rageText.setVisible(isRage);
+
+        if (!this.state.guiltModeActive) {
+            this.guiltOverlay.setVisible(false);
+            this.guiltText.setVisible(false);
+            this.guiltTextShadow.setVisible(false);
+        } else {
+            this.guiltOverlay.setVisible(true);
+            // The flashing timer will handle the text visibility
+        }
     }
 
     updateMission() {
