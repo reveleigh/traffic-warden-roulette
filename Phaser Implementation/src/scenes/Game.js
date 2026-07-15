@@ -194,7 +194,7 @@ export default class Game extends Phaser.Scene {
         this.events.emit('start_activity_bar', this.missionManager.durationTicks, this.player.isSafe);
 
         // Timer for activity completion
-        this.time.addEvent({
+        this.activityTimer = this.time.addEvent({
             delay: this.missionManager.durationTicks * 16.66, // Roughly 60fps equivalent
             callback: () => this.completeActivity(),
             callbackScope: this
@@ -202,6 +202,33 @@ export default class Game extends Phaser.Scene {
 
         // Check if Warden is already on the player
         this.checkCollision();
+    }
+
+    cancelActivity() {
+        if (this.activityTimer) {
+            this.activityTimer.remove();
+            this.activityTimer = null;
+        }
+        
+        this.isActivityRunning = false;
+        
+        if (this.stateManager.ambushActive) {
+            this.stateManager.ambushActive = false;
+            this.eliteWardens.forEach(w => w.destroy());
+            this.eliteWardens = [];
+        }
+
+        this.player.isSafe = false;
+
+        // Hide UI progress bar
+        const uiScene = this.scene.get('UI');
+        if (uiScene) {
+            uiScene.progressBarContainer.setVisible(false);
+            uiScene.tweens.killTweensOf(uiScene.progressFill);
+        }
+
+        // Start a new mission since this one failed
+        this.startNewMission();
     }
 
     completeActivity() {
@@ -286,6 +313,8 @@ export default class Game extends Phaser.Scene {
         if (hit) {
             if (!this.player.isSafe) {
                 // BUSTED
+                this.cancelActivity();
+                
                 this.scene.pause('UI');
                 this.sound.pauseAll();
                 this.scene.launch('Cutscene', { 
