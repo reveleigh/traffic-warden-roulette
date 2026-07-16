@@ -65,7 +65,7 @@ export default class Splash extends Phaser.Scene {
             this.scene.start('Instructions');
         });
         this.input.keyboard.on('keydown-L', () => {
-            this.scene.start('Leaderboard');
+            this.scene.start('Leaderboard', { isGameOver: false });
         });
     }
 }

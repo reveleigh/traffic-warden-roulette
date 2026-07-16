@@ -216,4 +216,35 @@ export default class GameMap {
 
         return perimeter.length > 0 ? Phaser.Utils.Array.GetRandom(perimeter) : null;
     }
+
+    findPath(startX, startY, targetX, targetY) {
+        if (startX === targetX && startY === targetY) return [];
+
+        const queue = [{x: startX, y: startY, path: []}];
+        const visited = new Set([`${startX},${startY}`]);
+        const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+        while (queue.length > 0) {
+            const current = queue.shift();
+
+            for (const [dx, dy] of dirs) {
+                const nx = current.x + dx;
+                const ny = current.y + dy;
+
+                if (nx === targetX && ny === targetY) {
+                    return [...current.path, {dx, dy}];
+                }
+
+                if (this.isRoad(nx, ny) && !visited.has(`${nx},${ny}`)) {
+                    visited.add(`${nx},${ny}`);
+                    queue.push({
+                        x: nx,
+                        y: ny,
+                        path: [...current.path, {dx, dy}]
+                    });
+                }
+            }
+        }
+        return [];
+    }
 }

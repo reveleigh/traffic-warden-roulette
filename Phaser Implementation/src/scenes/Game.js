@@ -91,18 +91,23 @@ export default class Game extends Phaser.Scene {
             
             if (Math.random() < this.stateManager.guiltChance) {
                 this.stateManager.guiltModeActive = true;
-                this.stateManager.guiltChance *= 2;
+                this.stateManager.guiltChance = 0.04;
                 
                 this.sound.stopAll();
                 const guiltMusic = this.sound.add('music_guilt');
                 guiltMusic.play();
                 guiltMusic.once('complete', () => {
                     this.stateManager.guiltModeActive = false;
+                    if (this.autoDriveTimer) this.autoDriveTimer.remove();
                     this.events.emit('ui_message', "Moral Panic Subsided");
                     this.events.emit('update_ui_hud');
                     this.sound.play('music_bg', { loop: true });
                 });
+                
+                // Start CPU Takeover
+                this.startGuiltAutoDrive();
             } else {
+                this.stateManager.guiltChance *= 2;
                 this.sound.stopAll();
                 this.sound.play('music_bg', { loop: true });
             }
@@ -160,6 +165,7 @@ export default class Game extends Phaser.Scene {
 
     update() {
         if (this.isMissionPopupOpen) return;
+        if (this.stateManager.guiltModeActive) return; // Disable manual input
 
         // Player Movement Logic
         let dx = 0, dy = 0;
@@ -176,8 +182,14 @@ export default class Game extends Phaser.Scene {
     checkArrival(px, py) {
         if (px === this.missionManager.currentSpot.x && py === this.missionManager.currentSpot.y) {
             this.sound.play('sfx_blip');
-            this.isMissionPopupOpen = true;
-            this.events.emit('show_mission_popup');
+            
+            if (this.stateManager.guiltModeActive) {
+                this.events.emit('ui_message', "Forced to Pay!");
+                this.handleMissionChoice('pay');
+            } else {
+                this.isMissionPopupOpen = true;
+                this.events.emit('show_mission_popup');
+            }
         }
     }
 
@@ -308,6 +320,14 @@ export default class Game extends Phaser.Scene {
         }
 
         this.startNewMission();
+        
+        // End Guilt Mode early after forced CPU payment
+        if (this.stateManager.guiltModeActive) {
+            this.stateManager.guiltModeActive = false;
+            this.events.emit('ui_message', "Moral Panic Subsided");
+            this.sound.stopAll();
+            this.sound.play('music_bg', { loop: true });
+        }
     }
 
     distractWarden() {
@@ -334,8 +354,6 @@ export default class Game extends Phaser.Scene {
     }
 
     checkCollision() {
-        if (!this.isActivityRunning) return;
-
         let hit = false;
         if (this.warden.gridX === this.player.gridX && this.warden.gridY === this.player.gridY) {
             hit = true;
@@ -368,5 +386,38 @@ export default class Game extends Phaser.Scene {
                 this.events.emit('ui_message', "Phew! Interaction Safe.");
             }
         }
+    }
+    startGuiltAutoDrive() {
+        const target = this.missionManager.currentSpot;
+        if (!target) return;
+
+        const path = this.gameMap.findPath(this.player.gridX, this.player.gridY, target.x, target.y);
+        if (path.length === 0) {
+            this.events.emit('ui_message', "Forced to Pay!");
+            this.handleMissionChoice('pay');
+            return;
+        }
+
+        let step = 0;
+        
+        this.events.emit('ui_message', "CPU TAKEOVER: DRIVING TO PAY");
+
+        this.autoDriveTimer = this.time.addEvent({
+            delay: 200, 
+            repeat: path.length - 1,
+            callback: () => {
+                if (!this.stateManager.guiltModeActive) {
+                    this.autoDriveTimer.remove();
+                    return;
+                }
+                
+                const move = path[step];
+                if (move) {
+                    this.player.move(move.dx, move.dy, this.gameMap);
+                }
+                step++;
+            },
+            callbackScope: this
+        });
     }
 }
