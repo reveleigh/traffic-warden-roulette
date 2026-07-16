@@ -84,6 +84,9 @@ export default class UI extends Phaser.Scene {
         this.gameScene.events.on('ui_message', this.showMessage, this);
         this.gameScene.events.on('start_activity_bar', this.startProgressBar, this);
 
+        // Prevent space and P from scrolling/interfering
+        this.input.keyboard.addCapture('SPACE,P');
+
         // Input
         this.input.keyboard.on('keydown-P', () => {
             if (this.popupContainer.visible) {
@@ -92,10 +95,14 @@ export default class UI extends Phaser.Scene {
             }
         });
         
-        this.input.keyboard.on('keydown-SPACE', () => {
+        this.input.keyboard.on('keydown-SPACE', (event) => {
+            if (event && event.preventDefault) event.preventDefault();
+            
             if (this.popupContainer.visible) {
                 if (this.state.guiltModeActive) {
-                    this.showMessage("Too guilty to risk it!");
+                    this.showMessage("Too guilty! Forced to pay!");
+                    this.popupContainer.setVisible(false);
+                    this.gameScene.events.emit('mission_choice', 'pay');
                 } else {
                     this.popupContainer.setVisible(false);
                     this.gameScene.events.emit('mission_choice', 'risk');
