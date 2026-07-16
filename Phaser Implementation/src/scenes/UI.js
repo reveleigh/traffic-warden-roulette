@@ -27,7 +27,7 @@ export default class UI extends Phaser.Scene {
         this.progressBarContainer = this.add.container(200, 660).setVisible(false);
         this.progressBg = this.add.rectangle(0, 0, 400, 30, 0x323232).setOrigin(0, 0).setStrokeStyle(2, 0xffffff);
         this.progressFill = this.add.rectangle(0, 0, 0, 30, 0x00ff00).setOrigin(0, 0);
-        this.progressText = this.add.text(200, -20, 'Risking IT', { fontSize: '20px', fill: '#ffffff' }).setOrigin(0.5).setStroke('#000000', 4);
+        this.progressText = this.add.text(200, 15, 'Risking IT', { fontSize: '20px', fill: '#ffffff', fontStyle: 'bold' }).setOrigin(0.5).setStroke('#000000', 4);
         this.progressBarContainer.add([this.progressBg, this.progressFill, this.progressText]);
 
         // Rage Mode Overlay
