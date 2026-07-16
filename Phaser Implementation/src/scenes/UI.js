@@ -13,7 +13,7 @@ export default class UI extends Phaser.Scene {
         // HUD Top Bar
         this.add.rectangle(0, 0, 800, 40, 0x000000).setOrigin(0, 0);
 
-        this.moneyDateText = this.add.text(20, 10, '', { fontSize: '24px', fill: '#ffffff' });
+        this.moneyDateText = this.add.text(10, 12, '', { fontSize: '20px', fill: '#ffffff' });
         this.missionGoalText = this.add.text(400, 60, '', { fontSize: '20px', fill: '#ffffff', backgroundColor: '#000000' })
             .setOrigin(0.5)
             .setPadding(10)
@@ -53,18 +53,18 @@ export default class UI extends Phaser.Scene {
         });
 
         // Meters (Audacity / Fine)
-        this.add.text(410, 10, 'Audacity:', { fontSize: '20px', fill: '#c8c8c8' }).setOrigin(1, 0);
-        this.add.text(640, 10, 'Fine:', { fontSize: '20px', fill: '#c8c8c8' }).setOrigin(1, 0);
+        this.add.text(450, 12, 'Audacity:', { fontSize: '20px', fill: '#c8c8c8' }).setOrigin(1, 0);
+        this.add.text(670, 12, 'Fine:', { fontSize: '20px', fill: '#c8c8c8' }).setOrigin(1, 0);
 
         this.audacityBlocks = [];
         for (let i = 0; i < 6; i++) {
-            const block = this.add.rectangle(420 + i * 17, 10, 15, 20, 0x323232).setOrigin(0, 0);
+            const block = this.add.rectangle(460 + i * 16, 10, 14, 20, 0x323232).setOrigin(0, 0);
             this.audacityBlocks.push(block);
         }
 
         this.fineBlocks = [];
         for (let i = 0; i < 6; i++) {
-            const block = this.add.rectangle(650 + i * 17, 10, 15, 20, 0x320000).setOrigin(0, 0);
+            const block = this.add.rectangle(680 + i * 16, 10, 14, 20, 0x320000).setOrigin(0, 0);
             this.fineBlocks.push(block);
         }
 
