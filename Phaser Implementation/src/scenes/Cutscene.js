@@ -20,8 +20,8 @@ export default class Cutscene extends Phaser.Scene {
         this.add.rectangle(0, 0, width, height, 0x000000, 0.5).setOrigin(0, 0).setDepth(1);
 
         // Assets
-        this.van = this.add.image(-400, height - 300, 'cutscene_van').setDisplaySize(400, 200).setOrigin(0.5).setDepth(2);
-        this.warden = this.add.image(width + 100, height - 200, 'cutscene_warden').setDisplaySize(150, 300).setOrigin(0.5).setDepth(2);
+        this.van = this.add.image(-750, height - 500, 'cutscene_van').setDisplaySize(750, 500).setOrigin(0, 0).setDepth(2);
+        this.warden = this.add.image(width, height - 600, 'cutscene_warden').setDisplaySize(300, 600).setOrigin(0, 0).setDepth(2);
 
         this.sound.play('sfx_busted');
 
@@ -30,14 +30,14 @@ export default class Cutscene extends Phaser.Scene {
         // Animation
         this.tweens.add({
             targets: this.van,
-            x: 200,
+            x: 0,
             duration: 500,
             ease: 'Power2'
         });
 
         this.tweens.add({
             targets: this.warden,
-            x: 600,
+            x: width - 300,
             duration: 500,
             ease: 'Power2',
             onComplete: () => {
