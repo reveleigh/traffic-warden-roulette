@@ -18,6 +18,7 @@ export default class StateManager {
         this.registry.set('ambushActive', false);
         this.registry.set('guiltChance', 0.04);
         this.registry.set('guiltModeActive', false);
+        this.registry.set('isRageModeActive', false);
     }
 
     reset() {
@@ -52,4 +53,7 @@ export default class StateManager {
 
     get guiltModeActive() { return this.registry.get('guiltModeActive'); }
     set guiltModeActive(val) { this.registry.set('guiltModeActive', val); }
+
+    get isRageModeActive() { return this.registry.get('isRageModeActive'); }
+    set isRageModeActive(val) { this.registry.set('isRageModeActive', val); }
 }

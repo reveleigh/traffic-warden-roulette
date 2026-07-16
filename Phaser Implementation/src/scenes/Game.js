@@ -189,13 +189,12 @@ export default class Game extends Phaser.Scene {
             this.player.isSafe = true;
             this.sound.play('sfx_pay');
 
-            // Reset Rage?
-            if (this.stateManager.rewardLevel >= 6) {
-                this.wardenInterval = Math.max(50, this.wardenInterval * 0.8);
-                this.startWardenTimer();
+            // Check if this ends Rage mode early? No, Rage must finish its music track.
+            // But we don't reset rewardLevel if Rage is active, so the HUD stays gold.
+            if (!this.stateManager.isRageModeActive) {
+                this.stateManager.rewardLevel = 0;
             }
-            this.stateManager.rewardLevel = 0;
-            this.events.emit('update_ui_hud');
+            this.events.emit('ui_message', `PAID £${this.missionManager.missionCost.toFixed(2)} - SAFE`);
             
             // Distract warden
             this.distractWarden();
@@ -279,7 +278,8 @@ export default class Game extends Phaser.Scene {
             reward = reward * mult;
             this.stateManager.money += reward;
             this.events.emit('ui_message', `Risk Paid Off! +£${reward.toFixed(2)}`);
-            if (this.stateManager.rewardLevel < 6) {
+            // Increase Reward Level (Only if NOT RAGING)
+            if (!this.stateManager.isRageModeActive && this.stateManager.rewardLevel < 6) {
                 this.stateManager.rewardLevel += 1;
             }
         }
@@ -288,20 +288,21 @@ export default class Game extends Phaser.Scene {
         this.player.isSafe = false;
 
         // Check Rage
-        if (this.stateManager.rewardLevel >= 6) {
-            if (this.stateManager.rewardLevel === 6) {
-                this.sound.stopAll();
-                const rageMusic = this.sound.add('music_rage');
-                rageMusic.play();
-                rageMusic.once('complete', () => {
-                    this.stateManager.rewardLevel = 0;
-                    this.wardenInterval = Math.max(50, this.wardenInterval * 0.8);
-                    this.startWardenTimer();
-                    this.events.emit('ui_message', "Warden calmed down.");
-                    this.events.emit('update_ui_hud');
-                    this.sound.play('music_bg', { loop: true });
-                });
-            }
+        if (this.stateManager.rewardLevel === 6 && !this.stateManager.isRageModeActive) {
+            this.stateManager.isRageModeActive = true;
+            this.sound.stopAll();
+            const rageMusic = this.sound.add('music_rage');
+            rageMusic.play();
+            rageMusic.once('complete', () => {
+                this.stateManager.isRageModeActive = false;
+                this.stateManager.rewardLevel = 0;
+                this.wardenInterval = Math.max(50, this.wardenInterval * 0.8);
+                this.startWardenTimer();
+                this.events.emit('ui_message', "Warden calmed down.");
+                this.events.emit('update_ui_hud');
+                this.sound.play('music_bg', { loop: true });
+            });
+            
             this.wardenInterval = 125;
             this.startWardenTimer();
         }
@@ -351,6 +352,9 @@ export default class Game extends Phaser.Scene {
             if (!this.player.isSafe) {
                 // BUSTED
                 this.cancelActivity();
+                
+                // Clear active rage status if caught
+                this.stateManager.isRageModeActive = false;
                 
                 this.scene.pause('UI');
                 this.sound.pauseAll();

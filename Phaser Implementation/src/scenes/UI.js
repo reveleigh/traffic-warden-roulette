@@ -27,12 +27,12 @@ export default class UI extends Phaser.Scene {
         this.progressBarContainer = this.add.container(200, 660).setVisible(false);
         this.progressBg = this.add.rectangle(0, 0, 400, 30, 0x323232).setOrigin(0, 0).setStrokeStyle(2, 0xffffff);
         this.progressFill = this.add.rectangle(0, 0, 0, 30, 0x00ff00).setOrigin(0, 0);
-        this.progressText = this.add.text(200, -20, 'Risking IT', { fontSize: '20px', fill: '#ffffff' }).setOrigin(0.5);
+        this.progressText = this.add.text(200, -20, 'Risking IT', { fontSize: '20px', fill: '#ffffff' }).setOrigin(0.5).setStroke('#000000', 4);
         this.progressBarContainer.add([this.progressBg, this.progressFill, this.progressText]);
 
         // Rage Mode Overlay
         this.rageOverlay = this.add.rectangle(0, 90, 800, 600, 0x00ff00, 0.2).setOrigin(0, 0).setVisible(false);
-        this.rageText = this.add.text(400, 55, 'WARDEN DESPAIR RAGE', { fontSize: '40px', fill: '#ff0000', fontStyle: 'bold' }).setOrigin(0.5).setVisible(false);
+        this.rageText = this.add.text(400, 100, 'WARDEN DESPAIR RAGE', { fontSize: '40px', fill: '#ff0000', fontStyle: 'bold' }).setOrigin(0.5).setStroke('#000000', 6).setVisible(false);
         
         // Guilt Mode Overlay
         this.guiltOverlay = this.add.rectangle(0, 90, 800, 600, 0xff0000, 0.4).setOrigin(0, 0).setVisible(false);
@@ -116,9 +116,11 @@ export default class UI extends Phaser.Scene {
         this.moneyDateText.setText(`£${this.state.money.toFixed(2)}   Date: ${day} ${month}`);
         
         // Update Meters
+        const isRage = this.state.isRageModeActive;
+        
         for (let i = 0; i < 6; i++) {
             if (i < this.state.rewardLevel) {
-                if (this.state.rewardLevel >= 6 && i === 5) {
+                if (isRage || (this.state.rewardLevel >= 6 && i === 5)) {
                     this.audacityBlocks[i].setFillStyle(0xffd700); // Gold for full rage
                 } else {
                     this.audacityBlocks[i].setFillStyle(0x00ff64); // Green
@@ -135,7 +137,6 @@ export default class UI extends Phaser.Scene {
         }
 
         // Update Overlays
-        const isRage = this.state.rewardLevel >= 6;
         this.rageOverlay.setVisible(isRage);
         this.rageText.setVisible(isRage);
 

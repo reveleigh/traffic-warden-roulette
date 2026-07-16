@@ -23,14 +23,37 @@ export default class Leaderboard extends Phaser.Scene {
             this.add.text(width/2, 100, 'YEAR COMPLETE', { fontSize: '60px', fill: '#ffffff' }).setOrigin(0.5);
             this.add.text(width/2, 180, `Final Money: £${this.finalMoney.toFixed(2)}`, { fontSize: '40px', fill: '#ffd700' }).setOrigin(0.5);
 
-            // Native browser prompt for Name
-            setTimeout(() => {
-                let name = prompt("Enter your name for the high scores:", "Anon");
-                if (!name || name.trim() === "") name = "Anon";
+            this.add.text(width/2, 280, 'ENTER YOUR NAME:', { fontSize: '40px', fill: '#ffffff' }).setOrigin(0.5);
+            this.nameInputText = this.add.text(width/2, 350, '_', { fontSize: '50px', fill: '#00ff00' }).setOrigin(0.5);
+            this.isTypingName = true;
+            this.playerName = "";
+
+            this.nameInputListener = (event) => {
+                if (!this.isTypingName) return;
                 
-                DBManager.saveScore(name, this.finalMoney);
-                this.showLeaderboard();
-            }, 500);
+                if (event.key === 'Backspace') {
+                    if (this.playerName.length > 0) {
+                        this.playerName = this.playerName.slice(0, -1);
+                    }
+                } else if (event.key === 'Enter') {
+                    this.isTypingName = false;
+                    let finalName = this.playerName.trim();
+                    if (finalName === "") finalName = "Anon";
+                    
+                    this.input.keyboard.off('keydown', this.nameInputListener);
+                    DBManager.saveScore(finalName, this.finalMoney);
+                    this.showLeaderboard();
+                } else if (event.key.length === 1 && this.playerName.length < 15) {
+                    this.playerName += event.key;
+                }
+                
+                if (this.isTypingName) {
+                    this.nameInputText.setText(this.playerName + '_');
+                }
+            };
+
+            this.input.keyboard.on('keydown', this.nameInputListener);
+
         } else {
             this.showLeaderboard();
         }
