@@ -53,8 +53,8 @@ export default class UI extends Phaser.Scene {
         });
 
         // Meters (Audacity / Fine)
-        this.add.text(420 - 75, 12, 'Audacity:', { fontSize: '20px', fill: '#c8c8c8' });
-        this.add.text(650 - 45, 12, 'Fine:', { fontSize: '20px', fill: '#c8c8c8' });
+        this.add.text(410, 10, 'Audacity:', { fontSize: '20px', fill: '#c8c8c8' }).setOrigin(1, 0);
+        this.add.text(640, 10, 'Fine:', { fontSize: '20px', fill: '#c8c8c8' }).setOrigin(1, 0);
 
         this.audacityBlocks = [];
         for (let i = 0; i < 6; i++) {
