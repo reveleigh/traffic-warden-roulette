@@ -20,8 +20,8 @@ export default class UI extends Phaser.Scene {
             .setStroke('#ffd700', 2);
 
         // Message Popups
-        this.messageText = this.add.text(400, 360, '', { fontSize: '40px', fill: '#ff0000', stroke: '#000000', strokeThickness: 6 })
-            .setOrigin(0.5).setAlpha(0);
+        this.messageText = this.add.text(400, 360, '', { fontSize: '40px', fill: '#ff0000', backgroundColor: '#000000' })
+            .setOrigin(0.5).setPadding(10).setAlpha(0);
 
         // Progress Bar
         this.progressBarContainer = this.add.container(200, 660).setVisible(false);
@@ -32,12 +32,13 @@ export default class UI extends Phaser.Scene {
 
         // Rage Mode Overlay
         this.rageOverlay = this.add.rectangle(0, 90, 800, 600, 0x00ff00, 0.2).setOrigin(0, 0).setVisible(false);
-        this.rageText = this.add.text(400, 100, 'WARDEN DESPAIR RAGE', { fontSize: '40px', fill: '#ff0000', fontStyle: 'bold' }).setOrigin(0.5).setStroke('#000000', 6).setVisible(false);
+        this.rageText = this.add.text(400, 100, 'WARDEN DESPAIR RAGE', { fontSize: '40px', fill: '#ff0000', fontStyle: 'bold', backgroundColor: '#000000' })
+            .setOrigin(0.5).setPadding(10).setVisible(false);
         
         // Guilt Mode Overlay
         this.guiltOverlay = this.add.rectangle(0, 90, 800, 600, 0xff0000, 0.4).setOrigin(0, 0).setVisible(false);
-        this.guiltText = this.add.text(400, 100, 'Moral Panic: Guilt Mode Enabled', { fontSize: '60px', fill: '#ffffff' }).setOrigin(0.5).setVisible(false);
-        this.guiltTextShadow = this.add.text(402, 102, 'Moral Panic: Guilt Mode Enabled', { fontSize: '60px', fill: '#000000' }).setOrigin(0.5).setVisible(false);
+        this.guiltText = this.add.text(400, 100, 'Moral Panic: Guilt Mode Enabled', { fontSize: '40px', fill: '#ffffff', fontStyle: 'bold', backgroundColor: '#000000' })
+            .setOrigin(0.5).setPadding(10).setVisible(false);
         
         // Flashing text timer
         this.time.addEvent({
@@ -45,9 +46,7 @@ export default class UI extends Phaser.Scene {
             loop: true,
             callback: () => {
                 if (this.state.guiltModeActive) {
-                    const isVis = this.guiltText.visible;
-                    this.guiltText.setVisible(!isVis);
-                    this.guiltTextShadow.setVisible(!isVis);
+                    this.guiltText.setVisible(!this.guiltText.visible);
                 }
             }
         });
@@ -143,7 +142,6 @@ export default class UI extends Phaser.Scene {
         if (!this.state.guiltModeActive) {
             this.guiltOverlay.setVisible(false);
             this.guiltText.setVisible(false);
-            this.guiltTextShadow.setVisible(false);
         } else {
             this.guiltOverlay.setVisible(true);
             // The flashing timer will handle the text visibility
