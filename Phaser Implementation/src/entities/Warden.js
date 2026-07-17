@@ -102,6 +102,7 @@ export default class Warden extends Phaser.GameObjects.Sprite {
             y: this.gridY * TILE_SIZE + this.offsetY + TILE_SIZE / 2,
             duration: this.scene.wardenInterval ? this.scene.wardenInterval * 0.8 : 100, // Slightly faster than interval
             onComplete: () => {
+                if (!this.scene || !this.active) return;
                 this.isMoving = false;
                 this.scene.events.emit('warden_moved');
             }

@@ -96,12 +96,17 @@ export default class Game extends Phaser.Scene {
                 this.sound.stopAll();
                 const guiltMusic = this.sound.add('music_guilt');
                 guiltMusic.play();
-                guiltMusic.once('complete', () => {
-                    this.stateManager.guiltModeActive = false;
-                    if (this.autoDriveTimer) this.autoDriveTimer.remove();
-                    this.events.emit('ui_message', "Moral Panic Subsided");
-                    this.events.emit('update_ui_hud');
-                    this.sound.play('music_bg', { loop: true });
+                this.time.addEvent({
+                    delay: 30000,
+                    callback: () => {
+                        this.stateManager.guiltModeActive = false;
+                        if (this.autoDriveTimer) this.autoDriveTimer.remove();
+                        this.events.emit('ui_message', "Moral Panic Subsided");
+                        this.events.emit('update_ui_hud');
+                        this.sound.stopAll();
+                        this.sound.play('music_bg', { loop: true });
+                    },
+                    callbackScope: this
                 });
                 
                 // Start CPU Takeover
@@ -232,8 +237,13 @@ export default class Game extends Phaser.Scene {
         this.events.emit('start_activity_bar', this.missionManager.durationTicks, this.player.isSafe);
 
         // Timer for activity completion
+        let delayTicks = this.missionManager.durationTicks * 16.66;
+        if (this.stateManager.guiltModeActive) {
+            delayTicks = 1; // Complete instantly during Moral Panic
+        }
+
         this.activityTimer = this.time.addEvent({
-            delay: this.missionManager.durationTicks * 16.66, // Roughly 60fps equivalent
+            delay: delayTicks, 
             callback: () => this.completeActivity(),
             callbackScope: this
         });
@@ -283,8 +293,7 @@ export default class Game extends Phaser.Scene {
 
         let reward = this.missionManager.potentialReward;
         if (this.player.isSafe) {
-            this.stateManager.money += reward;
-            this.events.emit('ui_message', `Done! +£${reward.toFixed(2)}`);
+            this.events.emit('ui_message', `Done! +£0.00`);
         } else {
             const mult = Math.pow(1.1, this.stateManager.rewardLevel);
             reward = reward * mult;
@@ -321,12 +330,9 @@ export default class Game extends Phaser.Scene {
 
         this.startNewMission();
         
-        // End Guilt Mode early after forced CPU payment
+        // Continue CPU Takeover if Moral Panic is still active
         if (this.stateManager.guiltModeActive) {
-            this.stateManager.guiltModeActive = false;
-            this.events.emit('ui_message', "Moral Panic Subsided");
-            this.sound.stopAll();
-            this.sound.play('music_bg', { loop: true });
+            this.startGuiltAutoDrive();
         }
     }
 
@@ -367,6 +373,8 @@ export default class Game extends Phaser.Scene {
         }
 
         if (hit) {
+            if (!this.isActivityRunning) return;
+
             if (!this.player.isSafe) {
                 // BUSTED
                 this.cancelActivity();
@@ -391,31 +399,30 @@ export default class Game extends Phaser.Scene {
         const target = this.missionManager.currentSpot;
         if (!target) return;
 
-        const path = this.gameMap.findPath(this.player.gridX, this.player.gridY, target.x, target.y);
-        if (path.length === 0) {
-            this.events.emit('ui_message', "Forced to Pay!");
-            this.handleMissionChoice('pay');
-            return;
-        }
-
-        let step = 0;
-        
         this.events.emit('ui_message', "CPU TAKEOVER: DRIVING TO PAY");
 
         this.autoDriveTimer = this.time.addEvent({
             delay: 200, 
-            repeat: path.length - 1,
+            loop: true,
             callback: () => {
                 if (!this.stateManager.guiltModeActive) {
                     this.autoDriveTimer.remove();
                     return;
                 }
+
+                if (this.player.isMoving) return; // Wait until current move finishes
                 
-                const move = path[step];
-                if (move) {
-                    this.player.move(move.dx, move.dy, this.gameMap);
+                const path = this.gameMap.findPath(this.player.gridX, this.player.gridY, target.x, target.y);
+                
+                if (path.length === 0) {
+                    this.autoDriveTimer.remove();
+                    this.events.emit('ui_message', "Forced to Pay!");
+                    this.handleMissionChoice('pay');
+                    return;
                 }
-                step++;
+                
+                const move = path[0];
+                this.player.move(move.dx, move.dy, this.gameMap);
             },
             callbackScope: this
         });
