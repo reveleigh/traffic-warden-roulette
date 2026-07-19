@@ -15,6 +15,9 @@ const config = {
     height: 720,
     parent: 'game-container',
     backgroundColor: '#1e1e28',
+    dom: {
+        createContainer: true
+    },
     scene: [Boot, Preloader, Splash, Instructions, Game, UI, Cutscene, Leaderboard],
     scale: {
         mode: Phaser.Scale.FIT,

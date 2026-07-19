@@ -869,7 +869,8 @@ def main():
                 pending_guilt_check = True
                 current_state = STATE_RUNNING
                 
-                current_mission_spot = random.choice(available_spots)
+                # Fully generate a new mission so the text and yellow square stay synced!
+                start_new_mission()
 
         # Draw logic follows...
 

@@ -24,35 +24,37 @@ export default class Leaderboard extends Phaser.Scene {
             this.add.text(width/2, 180, `Final Money: £${this.finalMoney.toFixed(2)}`, { fontSize: '40px', fill: '#ffd700' }).setOrigin(0.5);
 
             this.add.text(width/2, 280, 'ENTER YOUR NAME:', { fontSize: '40px', fill: '#ffffff' }).setOrigin(0.5);
-            this.nameInputText = this.add.text(width/2, 350, '_', { fontSize: '50px', fill: '#00ff00' }).setOrigin(0.5);
-            this.isTypingName = true;
-            this.playerName = "";
 
-            this.nameInputListener = (event) => {
-                if (!this.isTypingName) return;
+            this.nameInput = document.createElement('input');
+            this.nameInput.type = 'text';
+            this.nameInput.id = 'name-input-dom';
+            this.nameInput.maxLength = 15;
+            this.nameInput.placeholder = 'Anon';
+            
+            this.domElement = this.add.dom(width / 2, 350, this.nameInput);
+            this.nameInput.focus();
+
+            const submitText = this.add.text(width / 2, 450, 'Press ENTER or Tap Here to Submit', { fontSize: '24px', fill: '#aaaaaa' }).setOrigin(0.5)
+                .setInteractive({ useHandCursor: true });
                 
-                if (event.key === 'Backspace') {
-                    if (this.playerName.length > 0) {
-                        this.playerName = this.playerName.slice(0, -1);
-                    }
-                } else if (event.key === 'Enter') {
-                    this.isTypingName = false;
-                    let finalName = this.playerName.trim();
-                    if (finalName === "") finalName = "Anon";
-                    
-                    this.input.keyboard.off('keydown', this.nameInputListener);
-                    DBManager.saveScore(finalName, this.finalMoney);
-                    this.showLeaderboard();
-                } else if (event.key.length === 1 && this.playerName.length < 15) {
-                    this.playerName += event.key;
-                }
+            const submitName = () => {
+                let finalName = this.nameInput.value.trim();
+                if (!finalName || finalName === "") finalName = "Anon";
                 
-                if (this.isTypingName) {
-                    this.nameInputText.setText(this.playerName + '_');
-                }
+                this.domElement.destroy();
+                submitText.destroy();
+                
+                DBManager.saveScore(finalName, this.finalMoney);
+                this.showLeaderboard();
             };
 
-            this.input.keyboard.on('keydown', this.nameInputListener);
+            submitText.on('pointerdown', submitName);
+
+            this.input.keyboard.on('keydown-ENTER', () => {
+                if (this.domElement && this.domElement.active) {
+                    submitName();
+                }
+            });
 
         } else {
             this.showLeaderboard();
@@ -75,8 +77,13 @@ export default class Leaderboard extends Phaser.Scene {
             y += 40;
         });
 
-        this.add.text(width/2, height - 100, "Press 'R' to Restart Year", { fontSize: '24px', fill: '#aaaaaa' }).setOrigin(0.5);
-        this.add.text(width/2, height - 60, "Press 'ESC' for Home", { fontSize: '24px', fill: '#aaaaaa' }).setOrigin(0.5);
+        this.add.text(width/2, height - 100, "Press 'R' or Tap Here to Restart Year", { fontSize: '24px', fill: '#aaaaaa' }).setOrigin(0.5)
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => this.scene.start('Game'));
+            
+        this.add.text(width/2, height - 60, "Press 'ESC' or Tap Here for Home", { fontSize: '24px', fill: '#aaaaaa' }).setOrigin(0.5)
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => this.scene.start('Splash'));
 
         this.input.keyboard.on('keydown-R', () => {
             this.scene.start('Game');

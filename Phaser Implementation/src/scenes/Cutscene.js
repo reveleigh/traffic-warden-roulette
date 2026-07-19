@@ -17,7 +17,8 @@ export default class Cutscene extends Phaser.Scene {
             this.add.image(0, 0, this.locImageKey).setOrigin(0, 0).setDisplaySize(width, height).setDepth(0);
         }
         
-        this.add.rectangle(0, 0, width, height, 0x000000, 0.5).setOrigin(0, 0).setDepth(1);
+        // Add dark tint overlay like Pygame does (alpha 150/255 is ~0.6)
+        this.add.rectangle(0, 0, width, height, 0x000000, 0.6).setOrigin(0, 0).setDepth(1);
 
         // Assets
         this.van = this.add.image(-750, height - 500, 'cutscene_van').setDisplaySize(750, 500).setOrigin(0, 0).setDepth(2);
@@ -55,9 +56,11 @@ export default class Cutscene extends Phaser.Scene {
         this.state.fineLevel += 1;
         this.state.rewardLevel = 0;
 
-        // Reset entities
+        // Reset entities and mission state
         this.gameScene.player.reset();
         this.gameScene.warden.reset();
+        this.gameScene.distractionTarget = null;
+        this.gameScene.startNewMission();
         
         // Speed up warden slightly
         this.gameScene.wardenInterval = Math.max(50, this.gameScene.wardenInterval * 0.9);

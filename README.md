@@ -4,6 +4,9 @@
 
 ### 📺 [Watch the Gameplay Video](https://youtu.be/LZX-QTv14Rs)
 
+### 🎮 [Play the Web Version](https://www.reveleigh.com/computer-science/traffic-warden-roulette)
+I have also created a web-based implementation of this game using the **Phaser 3** framework so it can be played directly in the browser!
+
 A high-stakes, 2D grid-based arcade game where you play as **Rupert**, a busy dad in Cirencester, balancing an endless list of family errands with a tactical battle against the town's elite Traffic Warden squad.
 
 ## The Concept

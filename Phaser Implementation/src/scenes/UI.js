@@ -72,8 +72,29 @@ export default class UI extends Phaser.Scene {
         const pbg = this.add.rectangle(400, 360, 600, 400, 0x14141e).setOrigin(0.5).setStrokeStyle(2, 0xffffff);
         this.popupText = this.add.text(150, 200, '', { fontSize: '24px', fill: '#ffffff', wordWrap: { width: 500 }});
         
-        this.payOption = this.add.text(150, 400, '[P] PAY', { fontSize: '24px', fill: '#64ff64' });
-        this.riskOption = this.add.text(150, 450, '[SPACE] RISK IT', { fontSize: '24px', fill: '#ff6464' });
+        this.payOption = this.add.text(150, 400, '[P] PAY', { fontSize: '20px', fill: '#64ff64', wordWrap: { width: 500 } })
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                if (this.popupContainer.visible) {
+                    this.popupContainer.setVisible(false);
+                    this.gameScene.events.emit('mission_choice', 'pay');
+                }
+            });
+            
+        this.riskOption = this.add.text(150, 450, '[SPACE] RISK IT', { fontSize: '20px', fill: '#ff6464', wordWrap: { width: 500 } })
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                if (this.popupContainer.visible) {
+                    if (this.state.guiltModeActive) {
+                        this.showMessage("Too guilty! Forced to pay!");
+                        this.popupContainer.setVisible(false);
+                        this.gameScene.events.emit('mission_choice', 'pay');
+                    } else {
+                        this.popupContainer.setVisible(false);
+                        this.gameScene.events.emit('mission_choice', 'risk');
+                    }
+                }
+            });
         
         this.popupContainer.add([pbg, this.popupText, this.payOption, this.riskOption]);
 
@@ -166,17 +187,22 @@ export default class UI extends Phaser.Scene {
         const safeProfit = 0.00;
         const riskProfit = this.mission.potentialReward * Math.pow(1.1, this.state.rewardLevel);
 
-        this.payOption.setText(`[P] PAY £${this.mission.missionCost.toFixed(2)} (Profit: £${safeProfit.toFixed(2)})`);
-        this.riskOption.setText(`[SPACE] RISK IT (Profit: £${riskProfit.toFixed(2)})`);
+        this.payOption.setText(`[P] / TAP: PAY £${this.mission.missionCost.toFixed(2)} (Profit: £${safeProfit.toFixed(2)})`);
+        this.riskOption.setText(`[SPACE] / TAP: RISK IT (Profit: £${riskProfit.toFixed(2)})`);
     }
 
     showMessage(msg) {
         this.messageText.setText(msg);
         this.messageText.setAlpha(1);
-        this.tweens.add({
+        
+        if (this.messageTween) {
+            this.messageTween.stop();
+        }
+        
+        this.messageTween = this.tweens.add({
             targets: this.messageText,
             alpha: 0,
-            delay: 1000,
+            delay: 1500, // Stay on screen for 1.5 seconds before fading
             duration: 1000
         });
     }

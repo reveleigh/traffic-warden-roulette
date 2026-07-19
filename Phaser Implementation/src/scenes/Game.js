@@ -65,6 +65,27 @@ export default class Game extends Phaser.Scene {
             this.scene.start('Splash');
         });
 
+        // Touch / Click movement
+        this.input.on('pointerdown', (pointer) => {
+            if (this.isMissionPopupOpen) return;
+            if (this.stateManager.guiltModeActive) return;
+            if (this.isActivityRunning) return;
+
+            const dx = pointer.x - 400; // Center X
+            const dy = pointer.y - 360; // Center Y
+            
+            let moveDx = 0;
+            let moveDy = 0;
+            
+            if (Math.abs(dx) > Math.abs(dy)) {
+                moveDx = dx > 0 ? 1 : -1;
+            } else {
+                moveDy = dy > 0 ? 1 : -1;
+            }
+            
+            this.player.move(moveDx, moveDy, this.gameMap);
+        });
+
         // Event Listeners
         this.events.on('player_moved', this.checkArrival, this);
         this.events.on('warden_moved', this.checkCollision, this);
@@ -136,8 +157,14 @@ export default class Game extends Phaser.Scene {
 
     startWardenTimer() {
         if (this.wardenTimer) this.wardenTimer.remove();
+        
+        let interval = this.wardenInterval;
+        if (this.stateManager.isRageModeActive) {
+            interval = 125; // Override for rage mode
+        }
+
         this.wardenTimer = this.time.addEvent({
-            delay: this.wardenInterval,
+            delay: interval,
             loop: true,
             callback: this.moveWardens,
             callbackScope: this
@@ -171,6 +198,7 @@ export default class Game extends Phaser.Scene {
     update() {
         if (this.isMissionPopupOpen) return;
         if (this.stateManager.guiltModeActive) return; // Disable manual input
+        if (this.isActivityRunning) return; // Disable movement during activity
 
         // Player Movement Logic
         let dx = 0, dy = 0;
@@ -239,7 +267,7 @@ export default class Game extends Phaser.Scene {
         // Timer for activity completion
         let delayTicks = this.missionManager.durationTicks * 16.66;
         if (this.stateManager.guiltModeActive) {
-            delayTicks = 1; // Complete instantly during Moral Panic
+            delayTicks = 1500; // Give the player 1.5 seconds to read the 'Paid' message
         }
 
         this.activityTimer = this.time.addEvent({
@@ -274,9 +302,6 @@ export default class Game extends Phaser.Scene {
             uiScene.progressBarContainer.setVisible(false);
             uiScene.tweens.killTweensOf(uiScene.progressFill);
         }
-
-        // Start a new mission since this one failed
-        this.startNewMission();
     }
 
     completeActivity() {
@@ -324,7 +349,6 @@ export default class Game extends Phaser.Scene {
                 this.sound.play('music_bg', { loop: true });
             });
             
-            this.wardenInterval = 125;
             this.startWardenTimer();
         }
 
@@ -382,11 +406,20 @@ export default class Game extends Phaser.Scene {
                 // Clear active rage status if caught
                 this.stateManager.isRageModeActive = false;
                 
+                let cutsceneImageKey = this.missionManager.locImageKey;
+                if (this.distractionTarget) {
+                    const tile = this.gameMap.grid[this.distractionTarget.y][this.distractionTarget.x];
+                    if (tile === 10) cutsceneImageKey = 'shop_bakery';
+                    else if (tile === 11) cutsceneImageKey = 'shop_clothing';
+                    else if (tile === 12) cutsceneImageKey = 'shop_tech';
+                    else if (tile === 13) cutsceneImageKey = 'shop_cafe';
+                }
+                
                 this.scene.pause('UI');
                 this.sound.pauseAll();
                 this.scene.launch('Cutscene', { 
                     gameScene: this, 
-                    locImageKey: this.missionManager.locImageKey,
+                    locImageKey: cutsceneImageKey,
                     stateManager: this.stateManager
                 });
                 this.scene.pause();
@@ -400,6 +433,10 @@ export default class Game extends Phaser.Scene {
         if (!target) return;
 
         this.events.emit('ui_message', "CPU TAKEOVER: DRIVING TO PAY");
+
+        if (this.autoDriveTimer) {
+            this.autoDriveTimer.remove();
+        }
 
         this.autoDriveTimer = this.time.addEvent({
             delay: 200, 

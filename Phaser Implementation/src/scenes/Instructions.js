@@ -25,7 +25,7 @@ HOW TO PLAY:
 4. If a Warden catches you while risking it, you get FINED.
 5. Survive the year with the biggest Holiday Fund possible.
 
-[PRESS ENTER TO START]`;
+[PRESS ENTER OR TAP TO START]`;
 
         this.instructionsText = this.add.text(width / 2, 100, content, {
             fontSize: '24px',
@@ -38,6 +38,10 @@ HOW TO PLAY:
         }).setOrigin(0.5, 0);
 
         this.input.keyboard.on('keydown-ENTER', () => {
+            this.scene.start('Game');
+        });
+        
+        this.input.on('pointerdown', () => {
             this.scene.start('Game');
         });
         

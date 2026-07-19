@@ -35,14 +35,14 @@ export const MAP_HEIGHT = 15;
 export const TILE_SIZE = 40;
 
 export const LANDMARKS = [
-    { name: "Roman Amphitheatre", x: 15, y: 3, w: 3, h: 3, tile: TILE_AMPITHEATRE, imageKey: 'ampitheatre', tasks: ["Meet Tour Group", "Photo Opportunity", "Historical Walk", "School Trip Help"] },
+    { name: "Roman Amphitheatre", x: 15, y: 7, w: 3, h: 3, tile: TILE_AMPITHEATRE, imageKey: 'ampitheatre', tasks: ["Meet Tour Group", "Photo Opportunity", "Historical Walk", "School Trip Help"] },
     { name: "Open Air Pool", x: 3, y: 11, w: 2, h: 2, tile: TILE_POOL, imageKey: 'swimming_pool', tasks: ["Swimming Lesson (Fenella)", "Morning Laps (Rupert)", "Lifeguard Chat", "Collect Swimming Kit"] },
-    { name: "Corinium Museum", x: 7, y: 7, w: 2, h: 2, tile: TILE_MUSEUM, imageKey: 'museum', tasks: ["View Roman Mosaic", "Donate Old Coin", "Meet Curator", "Kids Workshop"] },
+    { name: "Corinium Museum", x: 7, y: 3, w: 2, h: 2, tile: TILE_MUSEUM, imageKey: 'museum', tasks: ["View Roman Mosaic", "Donate Old Coin", "Meet Curator", "Kids Workshop"] },
     { name: "Tesco Extra", x: 3, y: 3, w: 2, h: 2, tile: TILE_SUPERMARKET, imageKey: 'supermarket', tasks: ["Weekly Big Shop", "Buy Clementine's Wine", "Emergency Nappy Run", "Return Trolley"] },
-    { name: "Cirencester Church", x: 11, y: 7, w: 2, h: 2, tile: TILE_CHURCH, imageKey: 'church', tasks: ["Bell Ringing Practice", "Flower Arranging", "Meet Vicar", "Choir Practice"] },
-    { name: "Deer Park School", x: 15, y: 11, w: 2, h: 2, tile: TILE_SCHOOL, imageKey: 'school', tasks: ["Pick up Ivor", "Drop off Fenella", "Parents Evening", "Sports Day Event", "School Play"] },
-    { name: "St Micheals Hoard Mgt", x: 7, y: 3, w: 2, h: 2, tile: TILE_OFFICE_LARGE, imageKey: 'building_large_office', tasks: ["Count Gold Bars", "Lease Sign-off", "Hide Assets", "Investment Meeting", "Hoard Check"] },
-    { name: "Minor Injuries Unit", x: 11, y: 3, w: 2, h: 2, tile: TILE_HOSPITAL, imageKey: 'hospital', tasks: ["Rugby Injury (Ivor)", "X-Ray Appointment", "Stitched Finger", "Tetanus Shot", "Visit Granny"] }
+    { name: "Cirencester Church", x: 11, y: 3, w: 2, h: 2, tile: TILE_CHURCH, imageKey: 'church', tasks: ["Bell Ringing Practice", "Flower Arranging", "Meet Vicar", "Choir Practice"] },
+    { name: "Deer Park School", x: 15, y: 3, w: 2, h: 2, tile: TILE_SCHOOL, imageKey: 'school', tasks: ["Pick up Ivor", "Drop off Fenella", "Parents Evening", "Sports Day Event", "School Play"] },
+    { name: "St Micheals Hoard Mgt", x: 7, y: 11, w: 2, h: 2, tile: TILE_OFFICE_LARGE, imageKey: 'building_large_office', tasks: ["Count Gold Bars", "Lease Sign-off", "Hide Assets", "Investment Meeting", "Hoard Check"] },
+    { name: "Minor Injuries Unit", x: 11, y: 7, w: 2, h: 2, tile: TILE_HOSPITAL, imageKey: 'hospital', tasks: ["Rugby Injury (Ivor)", "X-Ray Appointment", "Stitched Finger", "Tetanus Shot", "Visit Granny"] }
 ];
 
 export default class GameMap {

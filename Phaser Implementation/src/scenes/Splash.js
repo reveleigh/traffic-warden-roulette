@@ -36,12 +36,25 @@ export default class Splash extends Phaser.Scene {
 
         // Instructions Text
         const textConfig = { fontSize: '40px', fill: '#ffffff', stroke: '#000000', strokeThickness: 6, fontFamily: 'monospace' };
-        this.add.text(width / 2, 400, 'Press ENTER to Begin', textConfig).setOrigin(0.5);
-        this.add.text(width / 2, 450, "Press 'L' for Leaderboard", textConfig).setOrigin(0.5);
+        
+        const startText = this.add.text(width / 2, 400, 'Press ENTER or Tap to Begin', textConfig).setOrigin(0.5);
+        
+        const leaderboardText = this.add.text(width / 2, 450, "Press 'L' or Tap Here for Leaderboard", textConfig).setOrigin(0.5);
+        leaderboardText.setInteractive({ useHandCursor: true });
+        leaderboardText.on('pointerdown', () => {
+            this.scene.start('Leaderboard', { isGameOver: false });
+        });
+
+        // Background touch starts game
+        this.input.on('pointerdown', (pointer, currentlyOver) => {
+            if (currentlyOver.length === 0) {
+                this.scene.start('Instructions');
+            }
+        });
 
         // Title text
         this.title = this.add.text(width / 2, height - 150, 'Traffic Warden Roulette', {
-            fontSize: '60px',
+            fontSize: '50px',
             fill: '#323232',
             stroke: '#ffff00',
             strokeThickness: 10,
