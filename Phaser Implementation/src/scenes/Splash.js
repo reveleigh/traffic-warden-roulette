@@ -35,7 +35,7 @@ export default class Splash extends Phaser.Scene {
         });
 
         // Instructions Text
-        const textConfig = { fontSize: '40px', fill: '#ffffff', stroke: '#000000', strokeThickness: 6, fontFamily: 'monospace' };
+        const textConfig = { fontSize: '30px', fill: '#ffffff', stroke: '#000000', strokeThickness: 6, fontFamily: 'monospace' };
         
         const startText = this.add.text(width / 2, 400, 'Press ENTER or Tap to Begin', textConfig).setOrigin(0.5);
         
